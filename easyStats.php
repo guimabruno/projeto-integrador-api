@@ -16,6 +16,7 @@ class Partida {
 
     public function inserir($idTimeCasa, $idTimeVisitante, $dataPartida, $resultado, $escanteiosCasa = 0, $escanteiosVisitante = 0, $cartoesAmarelosCasa = 0, $cartoesAmarelosVisitante = 0, $cartoesVermelhosCasa = 0, $cartoesVermelhosVisitante = 0, $golsCasa = 0, $golsVisitante = 0, $penalidadeCasa = 0, $penalidadeVisitante = 0, $jogadoresGolsCasa = '', $jogadoresGolsVisitante = '', $jogadoresCartoesAmarelosCasa = '', $jogadoresCartoesAmarelosVisitante = '', $jogadoresCartoesVermelhosCasa = '', $jogadoresCartoesVermelhosVisitante = '') {
         try {
+            // Inserindo a partida
             $sql = "INSERT INTO Partida (idTimeCasa, idTimeVisitante, dataPartida, resultado, escanteiosCasa, escanteiosVisitante, cartoesAmarelosCasa, cartoesAmarelosVisitante, cartoesVermelhosCasa, cartoesVermelhosVisitante, golsCasa, golsVisitante, penalidadeCasa, penalidadeVisitante, jogadoresGolsCasa, jogadoresGolsVisitante, jogadoresCartoesAmarelosCasa, jogadoresCartoesAmarelosVisitante, jogadoresCartoesVermelhosCasa, jogadoresCartoesVermelhosVisitante) 
                     VALUES (:idTimeCasa, :idTimeVisitante, :dataPartida, :resultado, :escanteiosCasa, :escanteiosVisitante, :cartoesAmarelosCasa, :cartoesAmarelosVisitante, :cartoesVermelhosCasa, :cartoesVermelhosVisitante, :golsCasa, :golsVisitante, :penalidadeCasa, :penalidadeVisitante, :jogadoresGolsCasa, :jogadoresGolsVisitante, :jogadoresCartoesAmarelosCasa, :jogadoresCartoesAmarelosVisitante, :jogadoresCartoesVermelhosCasa, :jogadoresCartoesVermelhosVisitante)";
     
@@ -45,10 +46,45 @@ class Partida {
     
             // Executa a inserção
             $stmt->execute();
-    
+
+            // Atualiza os times
+            $this->atualizarTimes($idTimeCasa, $golsCasa, $cartoesAmarelosCasa, $cartoesVermelhosCasa);
+            $this->atualizarTimes($idTimeVisitante, $golsVisitante, $cartoesAmarelosVisitante, $cartoesVermelhosVisitante);
+
+            // Atualiza os jogadores
+            $this->atualizarJogadores($jogadoresGolsCasa, 'golsAcumulados', $golsCasa);
+            $this->atualizarJogadores($jogadoresCartoesAmarelosCasa, 'cartoesAmarelosAcumulados', $cartoesAmarelosCasa);
+            $this->atualizarJogadores($jogadoresCartoesVermelhosCasa, 'cartoesVermelhosAcumulados', $cartoesVermelhosCasa);
+            $this->atualizarJogadores($jogadoresGolsVisitante, 'golsAcumulados', $golsVisitante);
+            $this->atualizarJogadores($jogadoresCartoesAmarelosVisitante, 'cartoesAmarelosAcumulados', $cartoesAmarelosVisitante);
+            $this->atualizarJogadores($jogadoresCartoesVermelhosVisitante, 'cartoesVermelhosAcumulados', $cartoesVermelhosVisitante);
+
             echo "Partida inserida com sucesso!";
         } catch (PDOException $e) {
             echo "Erro ao inserir partida: " . $e->getMessage();
+        }
+    }
+
+    private function atualizarTimes($idTime, $gols, $cartoesAmarelos, $cartoesVermelhos) {
+        $sql = "UPDATE Times SET golsAcumulados = golsAcumulados + :gols, cartoesAmarelosAcumulados = cartoesAmarelosAcumulados + :cartoesAmarelos, cartoesVermelhosAcumulados = cartoesVermelhosAcumulados + :cartoesVermelhos WHERE idTime = :idTime";
+        $stmt = $this->connPdo->prepare($sql);
+        $stmt->bindValue(':gols', $gols);
+        $stmt->bindValue(':cartoesAmarelos', $cartoesAmarelos);
+        $stmt->bindValue(':cartoesVermelhos', $cartoesVermelhos);
+        $stmt->bindValue(':idTime', $idTime);
+        $stmt->execute();
+    }
+
+    private function atualizarJogadores($idsJogadores, $campo, $valor) {
+        if ($idsJogadores) {
+            $ids = explode(',', $idsJogadores);
+            foreach ($ids as $id) {
+                $sql = "UPDATE Jogadores SET $campo = $campo + :valor WHERE idJogador = :idJogador";
+                $stmt = $this->connPdo->prepare($sql);
+                $stmt->bindValue(':valor', $valor);
+                $stmt->bindValue(':idJogador', intval($id));
+                $stmt->execute();
+            }
         }
     }
 }

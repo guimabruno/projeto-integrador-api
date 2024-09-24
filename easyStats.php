@@ -88,4 +88,40 @@ class Partida {
         }
     }
 }
+
+    class Time {
+
+        public static function select (int $id) {
+            $tabela ="times";
+            $coluna ="idTime";
+            $connPdo = new PDO(dbDrive.':host='.dbHost.'; dbname='.dbName, dbUser, dbPass);
+
+            $stmt = $connPdo->prepare("SELECT * FROM $tabela WHERE $coluna = :idTime");
+            $stmt->bindValue(':idTime', $id); // Corrigido o bindValue para corresponder ao parâmetro na consulta
+            $stmt->execute();
+
+            if ($stmt->rowCount() > 0) { 
+                return $stmt->fetch(PDO::FETCH_ASSOC); // Retorna os dados se existir
+            } else {
+                throw new Exception("Sem registro do time");
+            }
+        } // Aqui estava faltando o fechamento da função select()
+
+        public static function selectAll() {
+            $tabela = "times";
+            $connPdo = new PDO(dbDrive.':host='.dbHost.'; dbname='.dbName, dbUser, dbPass);
+
+            $sql = "SELECT * FROM $tabela";
+            $stmt = $connPdo->prepare($sql);
+            $stmt->execute();
+
+            if ($stmt->rowCount() > 0) {
+                return $stmt->fetchAll(PDO::FETCH_ASSOC); // Retorna todos os registros
+            } else {
+                throw new Exception("Nenhum registro encontrado");
+            }
+        }
+    }
+
+    
 ?>

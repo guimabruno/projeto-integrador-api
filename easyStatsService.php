@@ -48,13 +48,33 @@ class EasyStatsService
         ];
     }
 
-    // Um método (serviço) para consulta de dados
-    public function get($idTime = null)
+    // Um método (serviço) para consulta de dados dos times
+    public function getTime($idTime = null)
     {
         if ($idTime) { // se existe id, chama a operação: select($id)
             return time::select($idTime); // Corrigido para usar 'time' minúsculo
         } else { // se não existe id, chame a operação: selectAll()
             return time::selectAll(); // Corrigido para usar 'time' minúsculo
+        }
+    }
+
+    // Um método (serviço) para consulta de dados dos jogadores
+    public function getJogador($idJogador = null)
+    {
+        if ($idJogador) { // se existe id, chama a operação: select($id)
+            return Jogador::select($idJogador); // Corrigido para usar 'time' minúsculo
+        } else { // se não existe id, chame a operação: selectAll()
+            return Jogador::selectAll(); // Corrigido para usar 'time' minúsculo
+        }
+    }
+
+    // Um método (serviço) para consulta de dados dos jogadores
+    public function getPartida($idPartida = null)
+    {
+        if ($idPartida) { // se existe id, chama a operação: select($id)
+            return Partida::select($idPartida); // Corrigido para usar 'time' minúsculo
+        } else { // se não existe id, chame a operação: selectAll()
+            return Partida::selectAll(); // Corrigido para usar 'time' minúsculo
         }
     }
 }

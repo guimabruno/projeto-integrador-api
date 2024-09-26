@@ -1,11 +1,13 @@
-<?php 
+<?php
 
 require_once 'config.php';
 
-class Partida {
+class Partida
+{
     private $connPdo;
 
-    public function __construct() {
+    public function __construct()
+    {
         try {
             $this->connPdo = new PDO(dbDrive . ':host=' . dbHost . ';dbname=' . dbName, dbUser, dbPass);
             $this->connPdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -14,14 +16,15 @@ class Partida {
         }
     }
 
-    public function inserir($idTimeCasa, $idTimeVisitante, $dataPartida, $resultado, $escanteiosCasa = 0, $escanteiosVisitante = 0, $cartoesAmarelosCasa = 0, $cartoesAmarelosVisitante = 0, $cartoesVermelhosCasa = 0, $cartoesVermelhosVisitante = 0, $golsCasa = 0, $golsVisitante = 0, $penalidadeCasa = 0, $penalidadeVisitante = 0, $jogadoresGolsCasa = '', $jogadoresGolsVisitante = '', $jogadoresCartoesAmarelosCasa = '', $jogadoresCartoesAmarelosVisitante = '', $jogadoresCartoesVermelhosCasa = '', $jogadoresCartoesVermelhosVisitante = '') {
+    public function inserir($idTimeCasa, $idTimeVisitante, $dataPartida, $resultado, $escanteiosCasa = 0, $escanteiosVisitante = 0, $cartoesAmarelosCasa = 0, $cartoesAmarelosVisitante = 0, $cartoesVermelhosCasa = 0, $cartoesVermelhosVisitante = 0, $golsCasa = 0, $golsVisitante = 0, $penalidadeCasa = 0, $penalidadeVisitante = 0, $jogadoresGolsCasa = '', $jogadoresGolsVisitante = '', $jogadoresCartoesAmarelosCasa = '', $jogadoresCartoesAmarelosVisitante = '', $jogadoresCartoesVermelhosCasa = '', $jogadoresCartoesVermelhosVisitante = '')
+    {
         try {
             // Inserindo a partida
             $sql = "INSERT INTO Partida (idTimeCasa, idTimeVisitante, dataPartida, resultado, escanteiosCasa, escanteiosVisitante, cartoesAmarelosCasa, cartoesAmarelosVisitante, cartoesVermelhosCasa, cartoesVermelhosVisitante, golsCasa, golsVisitante, penalidadeCasa, penalidadeVisitante, jogadoresGolsCasa, jogadoresGolsVisitante, jogadoresCartoesAmarelosCasa, jogadoresCartoesAmarelosVisitante, jogadoresCartoesVermelhosCasa, jogadoresCartoesVermelhosVisitante) 
                     VALUES (:idTimeCasa, :idTimeVisitante, :dataPartida, :resultado, :escanteiosCasa, :escanteiosVisitante, :cartoesAmarelosCasa, :cartoesAmarelosVisitante, :cartoesVermelhosCasa, :cartoesVermelhosVisitante, :golsCasa, :golsVisitante, :penalidadeCasa, :penalidadeVisitante, :jogadoresGolsCasa, :jogadoresGolsVisitante, :jogadoresCartoesAmarelosCasa, :jogadoresCartoesAmarelosVisitante, :jogadoresCartoesVermelhosCasa, :jogadoresCartoesVermelhosVisitante)";
-    
+
             $stmt = $this->connPdo->prepare($sql);
-    
+
             // Bind dos valores
             $stmt->bindValue(':idTimeCasa', $idTimeCasa);
             $stmt->bindValue(':idTimeVisitante', $idTimeVisitante);
@@ -43,7 +46,7 @@ class Partida {
             $stmt->bindValue(':jogadoresCartoesAmarelosVisitante', $jogadoresCartoesAmarelosVisitante);
             $stmt->bindValue(':jogadoresCartoesVermelhosCasa', $jogadoresCartoesVermelhosCasa);
             $stmt->bindValue(':jogadoresCartoesVermelhosVisitante', $jogadoresCartoesVermelhosVisitante);
-    
+
             // Executa a inserção
             $stmt->execute();
 
@@ -65,7 +68,8 @@ class Partida {
         }
     }
 
-    private function atualizarTimes($idTime, $gols, $cartoesAmarelos, $cartoesVermelhos) {
+    private function atualizarTimes($idTime, $gols, $cartoesAmarelos, $cartoesVermelhos)
+    {
         $sql = "UPDATE Times SET golsAcumulados = golsAcumulados + :gols, cartoesAmarelosAcumulados = cartoesAmarelosAcumulados + :cartoesAmarelos, cartoesVermelhosAcumulados = cartoesVermelhosAcumulados + :cartoesVermelhos WHERE idTime = :idTime";
         $stmt = $this->connPdo->prepare($sql);
         $stmt->bindValue(':gols', $gols);
@@ -75,7 +79,8 @@ class Partida {
         $stmt->execute();
     }
 
-    private function atualizarJogadores($idsJogadores, $campo, $valor) {
+    private function atualizarJogadores($idsJogadores, $campo, $valor)
+    {
         if ($idsJogadores) {
             $ids = explode(',', $idsJogadores);
             foreach ($ids as $id) {
@@ -87,41 +92,111 @@ class Partida {
             }
         }
     }
-}
 
-    class Time {
+    public static function select(int $idPartida)
+    {
+        $tabela = "partida";
+        $coluna = "idPartida";
+        $connPdo = new PDO(dbDrive . ':host=' . dbHost . '; dbname=' . dbName, dbUser, dbPass);
 
-        public static function select (int $id) {
-            $tabela ="times";
-            $coluna ="idTime";
-            $connPdo = new PDO(dbDrive.':host='.dbHost.'; dbname='.dbName, dbUser, dbPass);
+        $stmt = $connPdo->prepare("SELECT * FROM $tabela WHERE $coluna = :idPartida");
+        $stmt->bindValue(':idPartida', $idPartida); // Corrigido o bindValue para corresponder ao parâmetro na consulta
+        $stmt->execute();
 
-            $stmt = $connPdo->prepare("SELECT * FROM $tabela WHERE $coluna = :idTime");
-            $stmt->bindValue(':idTime', $id); // Corrigido o bindValue para corresponder ao parâmetro na consulta
-            $stmt->execute();
-
-            if ($stmt->rowCount() > 0) { 
-                return $stmt->fetch(PDO::FETCH_ASSOC); // Retorna os dados se existir
-            } else {
-                throw new Exception("Sem registro do time");
-            }
-        } // Aqui estava faltando o fechamento da função select()
-
-        public static function selectAll() {
-            $tabela = "times";
-            $connPdo = new PDO(dbDrive.':host='.dbHost.'; dbname='.dbName, dbUser, dbPass);
-
-            $sql = "SELECT * FROM $tabela";
-            $stmt = $connPdo->prepare($sql);
-            $stmt->execute();
-
-            if ($stmt->rowCount() > 0) {
-                return $stmt->fetchAll(PDO::FETCH_ASSOC); // Retorna todos os registros
-            } else {
-                throw new Exception("Nenhum registro encontrado");
-            }
+        if ($stmt->rowCount() > 0) {
+            return $stmt->fetch(PDO::FETCH_ASSOC); // Retorna os dados se existir
+        } else {
+            throw new Exception("Sem registro do time");
         }
     }
 
-    
-?>
+    public static function selectAll()
+    {
+        $tabela = "partida";
+        $connPdo = new PDO(dbDrive . ':host=' . dbHost . '; dbname=' . dbName, dbUser, dbPass);
+
+        $sql = "SELECT * FROM $tabela";
+        $stmt = $connPdo->prepare($sql);
+        $stmt->execute();
+
+        if ($stmt->rowCount() > 0) {
+            return $stmt->fetchAll(PDO::FETCH_ASSOC); // Retorna todos os registros
+        } else {
+            throw new Exception("Nenhum registro encontrado");
+        }
+    }
+}
+
+class Time
+{
+
+    public static function select(int $idTime)
+    {
+        $tabela = "times";
+        $coluna = "idTime";
+        $connPdo = new PDO(dbDrive . ':host=' . dbHost . '; dbname=' . dbName, dbUser, dbPass);
+
+        $stmt = $connPdo->prepare("SELECT * FROM $tabela WHERE $coluna = :idTime");
+        $stmt->bindValue(':idTime', $idTime); // Corrigido o bindValue para corresponder ao parâmetro na consulta
+        $stmt->execute();
+
+        if ($stmt->rowCount() > 0) {
+            return $stmt->fetch(PDO::FETCH_ASSOC); // Retorna os dados se existir
+        } else {
+            throw new Exception("Sem registro do time");
+        }
+    } // Aqui estava faltando o fechamento da função select()
+
+    public static function selectAll()
+    {
+        $tabela = "times";
+        $connPdo = new PDO(dbDrive . ':host=' . dbHost . '; dbname=' . dbName, dbUser, dbPass);
+
+        $sql = "SELECT * FROM $tabela";
+        $stmt = $connPdo->prepare($sql);
+        $stmt->execute();
+
+        if ($stmt->rowCount() > 0) {
+            return $stmt->fetchAll(PDO::FETCH_ASSOC); // Retorna todos os registros
+        } else {
+            throw new Exception("Nenhum registro encontrado");
+        }
+    }
+}
+
+class Jogador
+{
+
+    public static function select(int $idJogador)
+    {
+        $tabela = "jogadores";
+        $coluna = "idJogador";
+        $connPdo = new PDO(dbDrive . ':host=' . dbHost . '; dbname=' . dbName, dbUser, dbPass);
+
+        $stmt = $connPdo->prepare("SELECT * FROM $tabela WHERE $coluna = :idJogador");
+        $stmt->bindValue(':idJogador', $idJogador); // Corrigido o bindValue para corresponder ao parâmetro na consulta
+        $stmt->execute();
+
+        if ($stmt->rowCount() > 0) {
+            return $stmt->fetch(PDO::FETCH_ASSOC); // Retorna os dados se existir
+        } else {
+            throw new Exception("Sem registro do time");
+        }
+    }
+
+    public static function selectAll()
+    {
+        $tabela = "jogadores";
+        $connPdo = new PDO(dbDrive . ':host=' . dbHost . '; dbname=' . dbName, dbUser, dbPass);
+
+        $sql = "SELECT * FROM $tabela";
+        $stmt = $connPdo->prepare($sql);
+        $stmt->execute();
+
+        if ($stmt->rowCount() > 0) {
+            return $stmt->fetchAll(PDO::FETCH_ASSOC); // Retorna todos os registros
+        } else {
+            throw new Exception("Nenhum registro encontrado");
+        }
+    }
+}

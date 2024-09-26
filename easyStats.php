@@ -92,39 +92,6 @@ class Partida
             }
         }
     }
-
-    public static function select(int $idPartida)
-    {
-        $tabela = "partida";
-        $coluna = "idPartida";
-        $connPdo = new PDO(dbDrive . ':host=' . dbHost . '; dbname=' . dbName, dbUser, dbPass);
-
-        $stmt = $connPdo->prepare("SELECT * FROM $tabela WHERE $coluna = :idPartida");
-        $stmt->bindValue(':idPartida', $idPartida); // Corrigido o bindValue para corresponder ao parâmetro na consulta
-        $stmt->execute();
-
-        if ($stmt->rowCount() > 0) {
-            return $stmt->fetch(PDO::FETCH_ASSOC); // Retorna os dados se existir
-        } else {
-            throw new Exception("Sem registro do time");
-        }
-    }
-
-    public static function selectAll()
-    {
-        $tabela = "partida";
-        $connPdo = new PDO(dbDrive . ':host=' . dbHost . '; dbname=' . dbName, dbUser, dbPass);
-
-        $sql = "SELECT * FROM $tabela";
-        $stmt = $connPdo->prepare($sql);
-        $stmt->execute();
-
-        if ($stmt->rowCount() > 0) {
-            return $stmt->fetchAll(PDO::FETCH_ASSOC); // Retorna todos os registros
-        } else {
-            throw new Exception("Nenhum registro encontrado");
-        }
-    }
 }
 
 class Time
@@ -150,43 +117,6 @@ class Time
     public static function selectAll()
     {
         $tabela = "times";
-        $connPdo = new PDO(dbDrive . ':host=' . dbHost . '; dbname=' . dbName, dbUser, dbPass);
-
-        $sql = "SELECT * FROM $tabela";
-        $stmt = $connPdo->prepare($sql);
-        $stmt->execute();
-
-        if ($stmt->rowCount() > 0) {
-            return $stmt->fetchAll(PDO::FETCH_ASSOC); // Retorna todos os registros
-        } else {
-            throw new Exception("Nenhum registro encontrado");
-        }
-    }
-}
-
-class Jogador
-{
-
-    public static function select(int $idJogador)
-    {
-        $tabela = "jogadores";
-        $coluna = "idJogador";
-        $connPdo = new PDO(dbDrive . ':host=' . dbHost . '; dbname=' . dbName, dbUser, dbPass);
-
-        $stmt = $connPdo->prepare("SELECT * FROM $tabela WHERE $coluna = :idJogador");
-        $stmt->bindValue(':idJogador', $idJogador); // Corrigido o bindValue para corresponder ao parâmetro na consulta
-        $stmt->execute();
-
-        if ($stmt->rowCount() > 0) {
-            return $stmt->fetch(PDO::FETCH_ASSOC); // Retorna os dados se existir
-        } else {
-            throw new Exception("Sem registro do time");
-        }
-    }
-
-    public static function selectAll()
-    {
-        $tabela = "jogadores";
         $connPdo = new PDO(dbDrive . ':host=' . dbHost . '; dbname=' . dbName, dbUser, dbPass);
 
         $sql = "SELECT * FROM $tabela";

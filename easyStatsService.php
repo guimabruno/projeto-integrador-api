@@ -57,4 +57,28 @@ class EasyStatsService
             return time::selectAll(); // Corrigido para usar 'time' minúsculo
         }
     }
+    public function delete($idPartida)
+{
+    if (!$idPartida) {
+        throw new Exception("ID da partida é necessário para deletar.");
+    }
+
+    // Instanciar a classe Partida
+    $partida = new Partida();
+    
+    // Chamar o método de deletar
+    $resultado = $partida->deletar($idPartida);
+
+    // Verificar se a deleção foi bem-sucedida
+    if ($resultado) {
+        return [
+            'message' => "Partida deletada com sucesso!",
+            'idPartida' => $idPartida
+        ];
+    } else {
+        throw new Exception("Erro ao deletar a partida com ID: " . $idPartida);
+    }
 }
+
+}
+
